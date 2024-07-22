@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    History - Suitable Recipe Finder
+{% endblock %}
+
+{% block content %}
+    <h1>History</h1>
+    <div class="row">
+        <!-- History Sidebar -->
+        <div class="col-md-4">
+            <div class="list-group">
+                {% for recipe in history_recipes %}
+                    <!-- Use buttons for recipe titles -->
+                    <button class="list-group-item recipe-button" data-recipe="{{ recipe.title }}">{{ recipe.title }}</button>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Recipe Details Area (For future extension)-->
+        <div class="col-md-8">
+            <div id="recipe-details" class="recipe-details">
+                <!-- Recipe details will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all recipe buttons
+            const recipeButtons = document.querySelectorAll('.recipe-button');
+    
+            // Add click event listener to each button
+            recipeButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    // Get recipe title from data attribute
+                    const recipeTitle = this.getAttribute('data-recipe');
+                    
+                    // Find corresponding recipe details
+                    const recipeDetails = findRecipeDetails(recipeTitle);
+                    
+                    // Display recipe details
+                    displayRecipeDetails(recipeDetails);
+                });
+            });
+    
+            // Function to find recipe details based on title
+            function findRecipeDetails(title) {
+                // Parse history_recipes to find the corresponding recipe details
+                const recipes = {{ history_recipes|safe }};
+                for (let i = 0; i < recipes.length; i++) {
+                    const recipe = recipes[i];
+                    if (recipe.title === title) {
+                        return formatRecipeDetails(recipe.details);
+                    }
+                }
+                return 'Recipe details not found.';
+            }
+    
+            // Function to format recipe details
+            function formatRecipeDetails(details) {
+                const parts = details.split('|');
+                const ingredients = parts[0].split(';').filter(ingredient => ingredient.trim() !== '').map(ingredient => `<li>${ingredient.trim()}</li>`).join('');
+                let directions = parts[1].replace(/'/g, '"');
+                directions = JSON.parse(directions);
+    
+                let formattedDirections = '';
+    
+                if (directions.length === 1) {
+                    directions = directions[0].split('. ');
+                    directions.forEach(function(direction, index) {
+                        // Decode ASCII codes
+                        direction = decodeURIComponent(JSON.parse(`"${direction}"`));
+                        formattedDirections += `${index + 1}. ${direction}<br>`;
+                    });
+                } else {
+                    directions.forEach(function(direction, index) {
+                        // Decode ASCII codes
+                        direction = decodeURIComponent(JSON.parse(`"${direction}"`));
+                        formattedDirections += `${index + 1}. ${direction}<br>`;
+                    });
+                }
+    
+                return `
+                    <h2>Ingredients:</h2>
+                    <ul>${ingredients}</ul>
+                    <h2>Directions:</h2>
+                    <ol>${formattedDirections}</ol>
+                `;
+            }
+    
+            // Function to display recipe details
+            function displayRecipeDetails(details) {
+                const recipeDetailsElement = document.getElementById('recipe-details');
+                recipeDetailsElement.innerHTML = details;
+            }
+        });
+    </script>
+{% endblock %}

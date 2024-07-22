@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Shopping List - Suitable Recipe Finder
+{% endblock %}
+
+{% block content %}
+    <h1>Shopping List</h1>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Ingredients</th>
+                    <th>Condition</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in shopping_list %}
+                    {% for ingredient_condition in item.ingredients %}
+                        <tr>
+                            {% if forloop.first %}
+                                <td rowspan="{{ item.ingredients|length }}">
+                                    {{ item.title }}
+                                    <br>
+                                    <form method="POST" action="{% url 'shopping_list_remove' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="title" value="{{ item.title }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                    </form>
+                                </td>                          
+                                <td>{{ ingredient_condition.0 }}</td>
+                                <td><input type="checkbox" class="bigger-checkbox" {% if ingredient_condition.1 == '1' %}checked{% endif %}></td>
+                            {% else %}
+                                <td>{{ ingredient_condition.0 }}</td>
+                                <td><input type="checkbox" class="bigger-checkbox" {% if ingredient_condition.1 == '1' %}checked{% endif %}></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <style>
+        /* CSS for bigger checkboxes */
+        .bigger-checkbox {
+            width: 40px; /* Set the width of the checkbox */
+            height: 40px; /* Set the height of the checkbox */
+        }
+    </style>
+{% endblock %}

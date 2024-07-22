@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Main Page{% endblock %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+        margin-top: 20px;
+    }
+
+    .container {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 40px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    #chat-container {
+        overflow-y: auto;
+        height: 514px;
+    }
+
+    #user-input {
+        width: 90%;
+        margin-right: 10px;
+        height: 40px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    #send-btn {
+        width: 120px;
+        height: 40px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #disclaimer {
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .user-message, .chatbot-message {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        max-width: 70%;
+    }
+
+    .user-message {
+        float: right;
+        clear: both;
+    }
+
+    .chatbot-message {
+        float: left;
+        clear: both;
+    }
+</style>
+
+<div id="chat-container">
+    <div id="chat-log"></div>
+</div>
+<input type="text" id="user-input">
+<button id="send-btn">Send</button>
+<div id="disclaimer">
+    CookBot can make mistakes. Consider checking important information.
+</div>
+
+<script>
+    document.getElementById('send-btn').addEventListener('click', function() {
+        sendMessage();
+    });
+
+    document.getElementById('user-input').addEventListener('keypress', function(e) {
+        if (e.keyCode === 13) {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        var userInput = document.getElementById('user-input').value;
+        document.getElementById('chat-log').innerHTML += '<div class="user-message">You<br>' + userInput + '</div>';
+        document.getElementById('user-input').value = '';
+
+        fetch('/chatbot/?message=' + userInput)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('chat-log').innerHTML += '<div class="chatbot-message">ChatBot<br>' + data.response + '</div>';
+        });
+    }
+</script>
+{% endblock %}
